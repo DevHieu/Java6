@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { login } from "@/services/authService";
+import { login, googleLogin } from "@/services/authService";
 import { useAuthStore } from "@/stores/authStore";
 import { setLocalStorageWithExpiry } from "@/helpers/LocalStorageHelper";
 
@@ -23,7 +23,22 @@ const handleLogin = async () => {
     authStore.login(userData);
     router.push("/");
   } catch (err) {
-    error.value = err.response?.data || "Đăng nhập thất bại";
+    error.value = err.response?.data?.message || "Đăng nhập thất bại";
+  }
+};
+
+const handleGoogleLogin = async (response) => {
+  try {
+    const userData = await googleLogin(response.credential);
+
+    const oneDay = 24 * 60 * 60 * 1000;
+    const expired = loginForm.value.rememberMe ? oneDay * 7 : oneDay; 
+    setLocalStorageWithExpiry("user", userData.email, expired);
+
+    authStore.login(userData);
+    router.push("/");
+  } catch (err) {
+    error.value = err.response?.data?.message || "Đăng nhập Google thất bại";
   }
 };
 </script>
@@ -94,6 +109,13 @@ const handleLogin = async () => {
             >
               ĐĂNG NHẬP
             </button>
+
+            <div class="mt-4 text-center">
+              <p class="text-muted small mb-2">Hoặc đăng nhập bằng</p>
+              <div class="d-flex justify-content-center">
+                <GoogleLogin :callback="handleGoogleLogin" />
+              </div>
+            </div>
           </form>
 
           <p class="text-center small mb-0 mt-3 text-muted">
