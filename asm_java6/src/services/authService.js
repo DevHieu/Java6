@@ -6,6 +6,12 @@ export const login = async (loginForm) => {
   return res.data;
 };
 
+// ĐĂNG NHẬP BẰNG GOOGLE
+export const googleLogin = async (idToken) => {
+  const res = await axios.post("/api/auth/google", { idToken });
+  return res.data;
+};
+
 // ĐĂNG XUẤT
 export const logout = async () => {
   await axios.post("/api/auth/logout");
